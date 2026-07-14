@@ -18,3 +18,20 @@ export const syncUserCreation = inngest.createFunction(
     });
   },
 );
+
+// Inngest function to update user data in database
+export const syncUserUpdate = inngest.createFunction(
+  { id: "sync-user-update" },
+  { event: "clerk/user.updated" },
+  async ({ event }) => {
+    const { data } = event;
+    await prisma.user.update({
+      where: { id: data.id },
+      data: {
+        email: data.email_addresses[0].email_address,
+        name: `${data.first_name} ${data.last_name}`,
+        image: data.image_url,
+      },
+    });
+  },
+);
