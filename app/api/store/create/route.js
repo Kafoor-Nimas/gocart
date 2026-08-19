@@ -1,4 +1,5 @@
 import imagekit from "@/configs/imageKit";
+import { toFile } from "@imagekit/nodejs";
 import { prisma } from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
@@ -59,8 +60,8 @@ export async function POST(request) {
 
     // image upload to imagekit
     const buffer = Buffer.from(await image.arrayBuffer());
-    const response = await imagekit.upload({
-      file: buffer,
+    const response = await imagekit.files.upload({
+      file: await toFile(buffer, image.name),
       fileName: image.name,
       folder: "logos",
     });
@@ -79,13 +80,19 @@ export async function POST(request) {
     //   ],
     // });
 
-    const optimizedImage = imagekit.url({
-      path: response.filePath,
-      transformation: [
-        { quality: "auto" },
-        { format: "webp" },
-        { width: "512" },
-      ],
+    // const optimizedImage = imagekit.url({
+    //   path: response.filePath,
+    //   transformation: [
+    //     { quality: "auto" },
+    //     { format: "webp" },
+    //     { width: "512" },
+    //   ],
+    // });
+
+    const optimizedImage = imagekit.helper.buildSrc({
+      urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
+      src: response.filePath,
+      transformation: [{ quality: "auto" }, { format: "webp" }, { width: 512 }],
     });
 
     const newStore = await prisma.store.create({
