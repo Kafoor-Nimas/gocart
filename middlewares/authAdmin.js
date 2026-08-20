@@ -15,3 +15,5 @@ const authAdmin = async (userId) => {
     return false;
   }
 };
+
+export default authAdmin;
