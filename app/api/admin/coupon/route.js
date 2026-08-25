@@ -51,3 +51,24 @@ export async function DELETE(request) {
     );
   }
 }
+
+// Get all coupons
+export async function GET(request) {
+  try {
+    const { userId } = getAuth();
+    const isAdmin = await authAdmin(userId);
+
+    if (!isAdmin) {
+      return NextResponse.json({ error: "not authorized" }, { status: 401 });
+    }
+    const coupons = await prisma.coupon.findMany({});
+
+    return NextResponse.json({ coupons });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: error.code || error.message },
+      { status: 400 },
+    );
+  }
+}
