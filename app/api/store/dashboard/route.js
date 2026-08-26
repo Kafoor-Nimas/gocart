@@ -4,7 +4,7 @@ import { getAuth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 // Get Dashboard data for Seller (total orders, total earnings, total products)
-export async function GET(requset) {
+export async function GET(request) {
   try {
     const { userId } = getAuth(request);
     const storeId = await authSeller(userId);
