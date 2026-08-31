@@ -1,4 +1,5 @@
 import imagekit from "@/configs/imageKit";
+import { toFile } from "@imagekit/nodejs";
 import { prisma } from "@/lib/prisma";
 import authSeller from "@/middlewares/authSeller";
 import { getAuth } from "@clerk/nextjs/server";
@@ -40,18 +41,19 @@ export async function POST(request) {
     const imageUrl = await Promise.all(
       images.map(async (image) => {
         const buffer = Buffer.from(await image.arrayBuffer());
-        const response = await imagekit.upload({
-          file: buffer,
+        const response = await imagekit.files.upload({
+          file: await toFile(buffer, image.name),
           fileName: image.name,
           folder: "products",
         });
 
-        const url = imagekit.url({
-          path: response.filePath,
+        const url = imagekit.helper.buildSrc({
+          urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT,
+          src: response.filePath,
           transformation: [
             { quality: "auto" },
             { format: "webp" },
-            { width: "1024" },
+            { width: 1024 },
           ],
         });
         return url;
